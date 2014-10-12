@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\..\windows\winutils.c" />
     <ClCompile Include="..\..\..\windows\winx11.c" />
     <ClCompile Include="..\..\..\x11fwd.c" />
+    <ClCompile Include="..\..\extensions.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\charset\charset.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="..\..\..\windows\win_res.h" />
     <ClInclude Include="..\..\..\windows\winhelp.h" />
     <ClInclude Include="..\..\..\windows\winstuff.h" />
+    <ClInclude Include="..\..\extensions.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\windows\pageant.ico" />
@@ -188,7 +190,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;imm32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;imm32.lib;winmm.lib;Winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -9,11 +9,16 @@
 #include "putty.h"
 #include "dialog.h"
 #include "storage.h"
+#include "extensions.h"
 
 #define PRINTER_DISABLED_STRING "None (printing disabled)"
 
 #define HOST_BOX_TITLE "Host Name (or IP address)"
 #define PORT_BOX_TITLE "Port"
+
+struct hostport {
+    union control *host, *port;
+};
 
 void conf_radiobutton_handler(union control *ctrl, void *dlg,
 			      void *data, int event)
@@ -73,6 +78,35 @@ void conf_checkbox_handler(union control *ctrl, void *dlg,
     } else if (event == EVENT_VALCHANGE) {
 	conf_set_int(conf, key, !dlg_checkbox_get(ctrl,dlg) ^ !invert);
     }
+}
+
+/// <summary>
+/// Sets the ie proxy value to the set input (stored in ctrl->generic.context.p)
+/// </summary>
+/// <param name="ctrl">The control to be handled.</param>
+/// <param name="dlg">The dialog of handled control.</param>
+/// <param name="data">The data to be used.</param>
+/// <param name="event">The event of handling.</param>
+void conf_get_ie_proxy_handler(union control *ctrl, void *dlg,
+			  void *data, int event)
+{
+	char portNum[6];
+
+	if(event == EVENT_ACTION) {
+
+		ProxyData proxy_data = 	get_ie_proxy();
+		if(proxy_data.address != NULL)
+		{
+			struct hostport * hp = (struct hostport *)ctrl->generic.context.p;
+
+			dlg_editbox_set(hp->host,dlg, proxy_data.address);
+
+			sprintf(portNum, "%d", proxy_data.port_num);
+			dlg_editbox_set(hp->port, dlg, portNum);
+
+			sfree(proxy_data.address);
+		}
+	}
 }
 
 void conf_editbox_handler(union control *ctrl, void *dlg,
@@ -247,9 +281,6 @@ static void config_port_handler(union control *ctrl, void *dlg,
     }
 }
 
-struct hostport {
-    union control *host, *port;
-};
 
 /*
  * We export this function so that platform-specific config
@@ -1288,6 +1319,10 @@ void setup_config_box(struct controlbox *b, int midsession,
     struct environ_data *ed;
     struct portfwd_data *pfd;
     union control *c;
+	union control *proxyBtn;
+	union control *proxyEditBox;
+	union control *portEditBox;
+	struct hostport *proxyHostPort;
     char *str;
     int current_storagetype; // HACK: PuttyTray / PuTTY File - stores storagetype after sess_list may or may not have switched between file/registry because registry is empty
 
@@ -2056,12 +2091,23 @@ void setup_config_box(struct controlbox *b, int midsession,
 			 conf_editbox_handler,
 			 I(CONF_proxy_host), I(1));
 	c->generic.column = 0;
+	proxyEditBox = c;
 	c = ctrl_editbox(s, "Port", 'p', 100,
 			 HELPCTX(proxy_main),
 			 conf_editbox_handler,
 			 I(CONF_proxy_port),
 			 I(-1));
 	c->generic.column = 1;
+	portEditBox = c;
+
+		//button to load ie proxy settings
+	proxyHostPort = (struct hostport *)ctrl_alloc(b, sizeof(struct hostport));
+	proxyHostPort->host = proxyEditBox;
+	proxyHostPort->port = portEditBox;
+	proxyBtn = ctrl_pushbutton(s, "Get Windows proxy", 'q',
+					 HELPCTX(proxy_main),
+					 conf_get_ie_proxy_handler,  P(proxyHostPort));
+
 	ctrl_columns(s, 1, 100);
 	ctrl_editbox(s, "Exclude Hosts/IPs", 'e', 100,
 		     HELPCTX(proxy_exclude),

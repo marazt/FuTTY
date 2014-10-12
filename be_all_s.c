@@ -15,6 +15,7 @@
  * declarations of appname, for as long as I can...
  */
 const char *const appname = "FuTTY";
+const char *const appVersion = "1.0.0.1 updated by marazt";
 
 #ifdef TELNET_DEFAULT
 const int be_default_protocol = PROT_TELNET;

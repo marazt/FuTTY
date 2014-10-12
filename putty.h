@@ -486,6 +486,12 @@ extern const int be_default_protocol;
 extern const char *const appname;
 
 /*
+ * Application version
+ *
+ */
+extern const char *const appVersion;
+
+/*
  * Some global flags denoting the type of application.
  * 
  * FLAG_VERBOSE is set when the user requests verbose details.
